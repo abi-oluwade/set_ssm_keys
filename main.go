@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -19,7 +19,7 @@ func main() {
 }
 
 func readValues() {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,10 +35,15 @@ func readValues() {
 	case "prod":
 		ppm_env = "/Prod"
 	default:
-		fmt.Println("/Dev")
+		ppm_env = "/Dev"
 	}
 
-	output, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
+	if os.Args[1] != "dev" && os.Args[1] != "test" && os.Args[1] != "prod" {
+		log.Print("Cannot find PPM Store environment provided, must be either 'dev','test' or 'prod'")
+		log.Fatal()
+	}
+
+	output, err := client.GetParametersByPath(context.Background(), &ssm.GetParametersByPathInput{
 		Path:      aws.String(ppm_env),
 		Recursive: aws.Bool(true),
 	})
@@ -47,8 +52,9 @@ func readValues() {
 	}
 
 	file, err := os.OpenFile(os.Args[2], os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
+	if err != nil || !strings.Contains(os.Args[2], "/") {
+		log.Print("Cannot open or read to file path provided.")
+		log.Fatal()
 	}
 
 	for _, param := range output.Parameters {

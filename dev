@@ -1,0 +1,3 @@
+define('DBHOST' ,'3000');
+define('DBPASS' ,'PASS');
+define('DBUSER' ,'User');
