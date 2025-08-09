@@ -44,8 +44,9 @@ func readValues() {
 	}
 
 	output, err := client.GetParametersByPath(context.Background(), &ssm.GetParametersByPathInput{
-		Path:      aws.String(ssm_env),
-		Recursive: aws.Bool(true),
+		Path:           aws.String(ssm_env),
+		Recursive:      aws.Bool(true),
+		WithDecryption: aws.Bool(true),
 	})
 	if err != nil {
 		log.Fatal(err)
