@@ -14,18 +14,11 @@ import (
 
 func main() {
 
-	// if os.Args[1] == "TODO" {
-	// 	fmt.Println("This will be where prod function goes")
-	// } else if os.Args[1] == "test" {
-	// 	fmt.Println("This will be where test function goes")
-	// } else {
-	// 	readValuesDev()
-	// }
-	readValuesDev()
+	readValues()
 
 }
 
-func readValuesDev() {
+func readValues() {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
@@ -34,7 +27,6 @@ func readValuesDev() {
 	client := ssm.NewFromConfig(cfg)
 
 	var ppm_env string
-
 	switch os.Args[1] {
 	case "dev":
 		ppm_env = "/Dev"
@@ -54,7 +46,7 @@ func readValuesDev() {
 		log.Fatal(err)
 	}
 
-	file, err := os.OpenFile("/home/abi/testfile", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(os.Args[2], os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
