@@ -26,25 +26,25 @@ func readValues() {
 
 	client := ssm.NewFromConfig(cfg)
 
-	var ppm_env string
+	var ssm_env string
 	switch os.Args[1] {
 	case "dev":
-		ppm_env = "/Dev"
+		ssm_env = "/Dev"
 	case "test":
-		ppm_env = "/Test"
+		ssm_env = "/Test"
 	case "prod":
-		ppm_env = "/Prod"
+		ssm_env = "/Prod"
 	default:
-		ppm_env = "/Dev"
+		ssm_env = "/Dev"
 	}
 
 	if os.Args[1] != "dev" && os.Args[1] != "test" && os.Args[1] != "prod" {
-		log.Print("Cannot find PPM Store environment provided, must be either 'dev','test' or 'prod'")
+		log.Print("Cannot find SSM Store environment provided, must be either 'dev','test' or 'prod'")
 		log.Fatal()
 	}
 
 	output, err := client.GetParametersByPath(context.Background(), &ssm.GetParametersByPathInput{
-		Path:      aws.String(ppm_env),
+		Path:      aws.String(ssm_env),
 		Recursive: aws.Bool(true),
 	})
 	if err != nil {
