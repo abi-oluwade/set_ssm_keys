@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -52,41 +53,42 @@ func readValues() {
 		log.Fatal(err)
 	}
 
-	input, err := os.ReadFile("/home/abi/test")
-	if err != nil {
-		log.Fatal(err)
+	// TODO - Add functionality to loop through files in directory
+
+	input, err := os.ReadFile(os.Args[2])
+	if err != nil || !strings.Contains(os.Args[2], "/") {
+		log.Print("Cannot open or read to file path provided.")
+		log.Fatal()
 	}
 
 	lines := strings.Split(string(input), "\n")
 
 	for i, line := range lines {
 		for _, param := range output.Parameters {
+
 			if strings.Contains(line, path.Base(aws.ToString(param.Name))) {
-				lines[i] = path.Base(aws.ToString(param.Name)) + " " + aws.ToString(param.Value)
+				fmt.Println(line)
+
+				if strings.Contains(os.Args[2], "test") {
+
+					lines[i] = strings.ReplaceAll(line, path.Base(aws.ToString(param.Name)+"_TOKEN"), aws.ToString(param.Value))
+
+					output2 := strings.Join(lines, "\n")
+					err = os.WriteFile(os.Args[2], []byte(output2), 0644)
+					if err != nil {
+						log.Fatal(err)
+					}
+				} else {
+					lines[i] = strings.ReplaceAll(line, "@"+path.Base(aws.ToString(param.Name))+"@", aws.ToString(param.Value))
+
+					output2 := strings.Join(lines, "\n")
+					err = os.WriteFile(os.Args[2], []byte(output2), 0644)
+					if err != nil {
+						log.Fatal(err)
+					}
+				}
 			}
+
 		}
 	}
-
-	output2 := strings.Join(lines, "\n")
-	err = os.WriteFile("/home/abi/test", []byte(output2), 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// file, err := os.OpenFile(os.Args[2], os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	// if err != nil || !strings.Contains(os.Args[2], "/") {
-	// 	log.Print("Cannot open or read to file path provided.")
-	// 	log.Fatal()
-	// }
-
-	// for _, param := range output.Parameters {
-	// 	if _, err := file.Write([]byte("define('" + (path.Base(aws.ToString(param.Name)) + "' ,'" + aws.ToString(param.Value)) + "');\n")); err != nil {
-	// 		log.Fatal(err)
-	// 	}
-
-	// }
-
-	// if err := file.Close(); err != nil {
-	// 	log.Fatal(err)
-	// }
 }
