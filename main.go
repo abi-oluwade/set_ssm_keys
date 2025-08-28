@@ -67,26 +67,21 @@ func readValues() {
 		for _, param := range output.Parameters {
 
 			if strings.Contains(line, path.Base(aws.ToString(param.Name))) {
-				fmt.Println(line)
+				fmt.Println("Replacing Placeholder in -->" + line)
 
 				if strings.Contains(os.Args[2], "test") {
 
 					lines[i] = strings.ReplaceAll(line, path.Base(aws.ToString(param.Name)+"_TOKEN"), aws.ToString(param.Value))
-
-					output2 := strings.Join(lines, "\n")
-					err = os.WriteFile(os.Args[2], []byte(output2), 0644)
-					if err != nil {
-						log.Fatal(err)
-					}
 				} else {
 					lines[i] = strings.ReplaceAll(line, "@"+path.Base(aws.ToString(param.Name))+"@", aws.ToString(param.Value))
-
-					output2 := strings.Join(lines, "\n")
-					err = os.WriteFile(os.Args[2], []byte(output2), 0644)
-					if err != nil {
-						log.Fatal(err)
-					}
 				}
+
+				output2 := strings.Join(lines, "\n")
+				err = os.WriteFile(os.Args[2], []byte(output2), 0644)
+				if err != nil {
+					log.Fatal(err)
+				}
+
 			}
 
 		}
