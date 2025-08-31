@@ -22,7 +22,7 @@ func main() {
 
 	for _, file := range directory {
 		current_file := (os.Args[2] + "/" + file.Name())
-		fmt.Println(current_file)
+		fmt.Println("Reading file ==> " + current_file)
 		readValues(current_file)
 	}
 
