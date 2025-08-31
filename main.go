@@ -15,11 +15,20 @@ import (
 
 func main() {
 
-	readValues()
+	directory, err := os.ReadDir(os.Args[2])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range directory {
+		current_file := (os.Args[2] + "/" + file.Name())
+		fmt.Println(current_file)
+		readValues(current_file)
+	}
 
 }
 
-func readValues() {
+func readValues(file string) {
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		log.Fatal(err)
@@ -53,12 +62,9 @@ func readValues() {
 		log.Fatal(err)
 	}
 
-	// TODO - Add functionality to loop through files in directory
-
-	input, err := os.ReadFile(os.Args[2])
-	if err != nil || !strings.Contains(os.Args[2], "/") {
-		log.Print("Cannot open or read to file path provided.")
-		log.Fatal()
+	input, err := os.ReadFile(file)
+	if err != nil || !strings.Contains(file, "/") {
+		log.Print("Cannot open or read to file path provided. Moving onto the next...")
 	}
 
 	lines := strings.Split(string(input), "\n")
@@ -67,17 +73,19 @@ func readValues() {
 		for _, param := range output.Parameters {
 
 			if strings.Contains(line, path.Base(aws.ToString(param.Name))) {
-				fmt.Println("Replacing Placeholder in -->" + line)
+				fmt.Println("Replacing Placeholder in " + line + " with ==> " + aws.ToString(param.Value))
 
-				if strings.Contains(os.Args[2], "test") {
+				if strings.Contains(file, ".php") {
 
 					lines[i] = strings.ReplaceAll(line, path.Base(aws.ToString(param.Name)+"_TOKEN"), aws.ToString(param.Value))
-				} else {
+
+				} else if strings.Contains(file, ".sh") {
+
 					lines[i] = strings.ReplaceAll(line, "@"+path.Base(aws.ToString(param.Name))+"@", aws.ToString(param.Value))
 				}
 
 				output2 := strings.Join(lines, "\n")
-				err = os.WriteFile(os.Args[2], []byte(output2), 0644)
+				err = os.WriteFile(file, []byte(output2), 0644)
 				if err != nil {
 					log.Fatal(err)
 				}
