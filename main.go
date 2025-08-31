@@ -75,14 +75,7 @@ func readValues(file string) {
 			if strings.Contains(line, path.Base(aws.ToString(param.Name))) {
 				fmt.Println("Replacing Placeholder in " + line + " with ==> " + aws.ToString(param.Value))
 
-				if strings.Contains(file, ".php") {
-
-					lines[i] = strings.ReplaceAll(line, path.Base(aws.ToString(param.Name)+"_TOKEN"), aws.ToString(param.Value))
-
-				} else if strings.Contains(file, ".sh") {
-
-					lines[i] = strings.ReplaceAll(line, "@"+path.Base(aws.ToString(param.Name))+"@", aws.ToString(param.Value))
-				}
+				lines[i] = strings.ReplaceAll(line, "@"+path.Base(aws.ToString(param.Name))+"@", aws.ToString(param.Value))
 
 				output2 := strings.Join(lines, "\n")
 				err = os.WriteFile(file, []byte(output2), 0644)
