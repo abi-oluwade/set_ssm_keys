@@ -53,7 +53,7 @@ func readValues(file string) {
 		log.Fatal()
 	}
 
-	output, err := client.GetParametersByPath(context.Background(), &ssm.GetParametersByPathInput{
+	param_output, err := client.GetParametersByPath(context.Background(), &ssm.GetParametersByPathInput{
 		Path:           aws.String(ssm_env),
 		Recursive:      aws.Bool(true),
 		WithDecryption: aws.Bool(true),
@@ -62,23 +62,23 @@ func readValues(file string) {
 		log.Fatal(err)
 	}
 
-	input, err := os.ReadFile(file)
+	file_input, err := os.ReadFile(file)
 	if err != nil || !strings.Contains(file, "/") {
 		log.Print("Cannot open or read to file path provided. Moving onto the next...")
 	}
 
-	lines := strings.Split(string(input), "\n")
+	lines := strings.Split(string(file_input), "\n")
 
 	for i, line := range lines {
-		for _, param := range output.Parameters {
+		for _, param := range param_output.Parameters {
 
 			if strings.Contains(line, path.Base(aws.ToString(param.Name))) {
 				fmt.Println("Replacing Placeholder in " + line + " with ==> " + aws.ToString(param.Value))
 
 				lines[i] = strings.ReplaceAll(line, "@"+path.Base(aws.ToString(param.Name))+"@", aws.ToString(param.Value))
 
-				output2 := strings.Join(lines, "\n")
-				err = os.WriteFile(file, []byte(output2), 0644)
+				updated_file := strings.Join(lines, "\n")
+				err = os.WriteFile(file, []byte(updated_file), 0644)
 				if err != nil {
 					log.Fatal(err)
 				}
